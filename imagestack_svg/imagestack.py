@@ -1,3 +1,4 @@
+import io
 from PySide2.QtCore import QByteArray, QBuffer, QIODevice
 from PySide2.QtGui import QImage, QPainter
 from PySide2.QtSvg import QSvgRenderer
@@ -27,7 +28,7 @@ class ImageStack:
         orig_svg.save(buffer, 'PNG', -1)
         painter.end()
         buffer.seek(0)
-        return bytes(buffer.readAll())
+        return io.BytesIO(buffer.readAll())
 
     async def create_bytes(self, image_creator: ImageCreator, max_size: tuple = None):
         return self._create_bytes(self.svg, max_size)

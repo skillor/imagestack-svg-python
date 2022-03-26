@@ -31,7 +31,7 @@ class Tests(unittest.IsolatedAsyncioTestCase):
 
         res = await creator.create_bytes(s)
 
-        self.assertGreater(len(res), 1)
+        self.assertGreater(len(res.read()), 1)
 
         res = await creator.create_inner_svg(s)
         self.assertEqual(res, '<rect x="0" y="0" width="600" height="150" rx="20" ry="20" fill="rgb(48, 50, 55)"/>\n'
