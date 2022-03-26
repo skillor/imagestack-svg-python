@@ -15,12 +15,14 @@ concurrency:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     
     strategy:
       matrix:
         python-version: ['3.8']
+
+    env:
+      QT_QPA_PLATFORM: "offscreen"
 
     steps:
     - uses: actions/checkout@v2
