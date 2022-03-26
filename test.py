@@ -1,7 +1,8 @@
 import unittest
 
-from imagestack_svg.loaders import *
-from imagestack_svg.imageresolve import *
+from imagestack_svg.imageresolve import ImageStackResolveString
+from imagestack_svg.imagecreator import ImageCreator
+from imagestack_svg.helpers import is_emoji, from_char, to_char
 
 
 class Tests(unittest.IsolatedAsyncioTestCase):
