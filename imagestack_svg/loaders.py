@@ -127,10 +127,6 @@ class FontLoader:
                 if len(font_names) != 1:
                     raise ValueError('Multiple ttf fonts not supported currently')
 
-                if font_names[0] in self.loaded_fonts:
-                    raise KeyError('Font {} has the same name as font {}'.format(
-                        font_path, self.loaded_fonts[font_names[0]][1]))
-
                 idx = self.font_db.addApplicationFontFromData(font_bytes)
                 base64_font = base64.b64encode(font_bytes).decode('ascii')
                 font_style = '@font-face {{font-family:\'{}\';' \
