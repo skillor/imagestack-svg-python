@@ -1,3 +1,5 @@
+from PySide2.QtGui import QImage
+
 from .imagestack import ImageStack
 from .imagecreator import ImageCreator
 
@@ -7,9 +9,13 @@ class ImageStackResolveString(ImageStack):
         super().__init__(svg)
         self.last_kwargs = {}
 
-    async def create_bytes(self, image_creator: ImageCreator, max_size: tuple = None):
+    async def create_bytes(self,
+                           image_creator: ImageCreator,
+                           image_format: QImage.Format = QImage.Format_RGBA64,
+                           max_size: tuple = None):
         template = image_creator.jinja2_create_bytes_env.from_string(self.svg)
         return await super()._create_bytes(template.render(**self.last_kwargs),
+                                           image_format,
                                            max_size)
 
     async def create_raw_svg(self, image_creator: ImageCreator):

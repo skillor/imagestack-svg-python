@@ -1,3 +1,4 @@
+from PySide2.QtGui import QImage
 from PySide2.QtWidgets import QApplication
 import asyncio
 import threading
@@ -6,9 +7,10 @@ import jinja2.sandbox
 from .loaders import FontLoader, WebImageLoader, EmojiLoader
 from .helpers import AsyncEvent
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
+    import io
     from .imagestack import ImageStack
 
 
@@ -23,7 +25,10 @@ class ImageCreator:
                  emoji_loader: EmojiLoader = None,
                  ):
 
-        QApplication([])
+        try:
+            QApplication([])
+        except RuntimeError:
+            pass
 
         if font_loader is None:
             font_loader = FontLoader()
@@ -49,7 +54,10 @@ class ImageCreator:
         self.jinja2_create_svg_env.filters['emoji'] = self.emoji_loader.get_base64
         self.jinja2_create_svg_env.filters['web_image'] = self.web_image_loader.get_url
 
-    async def create_bytes(self, stack: 'ImageStack', max_size=(-1, -1)):
+    async def create_bytes(self,
+                           stack: 'ImageStack',
+                           image_format: QImage.Format = QImage.Format_RGBA64,
+                           max_size=(-1, -1)) -> Optional['io.BytesIO']:
         if stack is None:
             return None
 
@@ -66,7 +74,9 @@ class ImageCreator:
 
             async def _async_create(self):
                 try:
-                    self.result = await stack.create_bytes(image_creator=self.image_creator, max_size=max_size)
+                    self.result = await stack.create_bytes(image_creator=self.image_creator,
+                                                           image_format=image_format,
+                                                           max_size=max_size)
                 except Exception as err:
                     self.error = err
                 self.event.set()
@@ -81,14 +91,14 @@ class ImageCreator:
 
         return ci.result
 
-    async def create_raw_svg(self, stack: 'ImageStack'):
+    async def create_raw_svg(self, stack: 'ImageStack') -> str:
         return await stack.create_raw_svg(image_creator=self)
 
-    async def create_inner_svg(self, stack: 'ImageStack'):
+    async def create_inner_svg(self, stack: 'ImageStack') -> str:
         return await stack.create_inner_svg(image_creator=self)
 
-    async def create_style(self):
+    async def create_style(self) -> str:
         return self.font_loader.get_style()
 
-    async def create_full_svg(self, stack: 'ImageStack'):
+    async def create_full_svg(self, stack: 'ImageStack') -> str:
         return f'{SVG_PREFIX}<style>{await self.create_style()}</style>{await self.create_inner_svg(stack)}{SVG_SUFFIX}'
