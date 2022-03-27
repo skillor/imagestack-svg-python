@@ -1,6 +1,6 @@
 import io
 from PySide2.QtCore import QByteArray, QBuffer, QIODevice
-from PySide2.QtGui import QImage, QPainter
+from PySide2.QtGui import QImage, QPainter, QColor
 from PySide2.QtSvg import QSvgRenderer
 from .imagecreator import ImageCreator, SVG_PREFIX, SVG_SUFFIX
 
@@ -19,6 +19,9 @@ class ImageStack:
         svg = f'{SVG_PREFIX}{svg}{SVG_SUFFIX}'
         svg_renderer = QSvgRenderer(svg.encode())
         orig_svg = QImage(svg_renderer.defaultSize(), image_format)
+
+        orig_svg.fill(QColor(0, 0, 0, 0))
+
         painter = QPainter(orig_svg)
 
         svg_renderer.render(painter)
