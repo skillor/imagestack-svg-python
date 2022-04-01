@@ -39,6 +39,25 @@ class Tests(unittest.IsolatedAsyncioTestCase):
                               '<rect x="0" y="150" width="600" height="150" rx="20" ry="20" fill="rgb(48, 50, 55)"/>\n'
                               '<text x="300" y="200" fill="blue">User 2</text>\n')
 
+    async def test_replace(self):
+        creator = ImageCreator()
+
+        svg = '<rect width="250" height="40" rx="10" ry="10" fill="red"/>\n' \
+              '<text id="title" text-anchor="middle" fill="white">{{ name }}</text>'
+
+        s = ImageStackResolveString(svg)
+        s(**{
+            'name': 'Legginsdarry'
+        })
+
+        s = s.replace('title', '<text id="title" text-anchor="start" fill="white">Leggins</text>')
+
+        s = s.replace('title', '<text id="title" text-anchor="start" fill="white">Leggins</text>')
+
+        res = await creator.create_inner_svg(s)
+        self.assertEqual(res, '<rect width="250" height="40" rx="10" ry="10" fill="red"/>\n'
+                              '<text id="title" text-anchor="start" fill="white">Leggins</text>')
+
 
 if __name__ == '__main__':
     unittest.main()
