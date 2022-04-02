@@ -52,11 +52,11 @@ class Tests(unittest.IsolatedAsyncioTestCase):
 
         s = s.replace('title', '<text id="title" text-anchor="start" fill="white">Leggins</text>')
 
-        s = s.replace('title', '<text id="title" text-anchor="start" fill="white">Leggins</text>')
+        s = s.replace('title', '<image id="userEmoji" x="147" y="15" width="40" height="40" xlink:href="house"/>')
 
         res = await creator.create_inner_svg(s)
         self.assertEqual(res, '<rect width="250" height="40" rx="10" ry="10" fill="red"/>\n'
-                              '<text id="title" text-anchor="start" fill="white">Leggins</text>')
+                              '<image id="userEmoji" x="147" y="15" width="40" height="40" xlink:href="house"/>')
 
 
 if __name__ == '__main__':

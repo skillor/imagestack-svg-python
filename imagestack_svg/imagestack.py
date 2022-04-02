@@ -5,9 +5,7 @@ from PySide2.QtCore import QByteArray, QBuffer, QIODevice
 from PySide2.QtGui import QImage, QPainter, QColor
 from PySide2.QtSvg import QSvgRenderer
 from .imagecreator import ImageCreator, SVG_PREFIX, SVG_SUFFIX
-# TODO: defuse xml
-# from defusedxml.ElementTree import fromstring, tostring
-from lxml.etree import fromstring, tostring
+from defusedxml.lxml import fromstring, tostring
 
 
 class ImageStack:
@@ -70,14 +68,14 @@ class ImageStack:
         if not self._replace_stack:
             return svg
 
-        parsed = fromstring(f"<root>{svg}</root>")
+        parsed = fromstring(f"{SVG_PREFIX}{svg}{SVG_SUFFIX}")
         for replace_id, content in self._replace_stack:
-            content_parsed = fromstring(content)
+            content_parsed = fromstring(f"{SVG_PREFIX}{content}{SVG_SUFFIX}")[0]
             elements = parsed.findall(f".//*[@id = '{replace_id}']")
             for el in elements:
                 el.getparent().replace(el, content_parsed)
         decoded = tostring(parsed).decode()
-        return decoded[6:-7]
+        return decoded[len(SVG_PREFIX):-len(SVG_SUFFIX)]
 
     def replace(self, replace_id: str, content: str):
         return self.create(self.svg, self._replace_stack + [(replace_id, content)], self._last_kwargs)
