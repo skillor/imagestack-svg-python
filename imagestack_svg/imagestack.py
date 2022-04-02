@@ -1,10 +1,12 @@
 import io
+import re
 from typing import List, Tuple
 
 from PySide2.QtCore import QByteArray, QBuffer, QIODevice
 from PySide2.QtGui import QImage, QPainter, QColor
 from PySide2.QtSvg import QSvgRenderer
 from .imagecreator import ImageCreator, SVG_PREFIX, SVG_SUFFIX
+import html
 from defusedxml.lxml import fromstring, tostring
 
 
@@ -68,14 +70,16 @@ class ImageStack:
         if not self._replace_stack:
             return svg
 
-        parsed = fromstring(f"{SVG_PREFIX}{svg}{SVG_SUFFIX}")
+        parsed = fromstring(f"{SVG_PREFIX}{re.sub('({%.*%})', lambda x: html.escape(x.group()), svg)}{SVG_SUFFIX}")
         for replace_id, content in self._replace_stack:
             content_parsed = fromstring(f"{SVG_PREFIX}{content}{SVG_SUFFIX}")[0]
             elements = parsed.findall(f".//*[@id = '{replace_id}']")
             for el in elements:
                 el.getparent().replace(el, content_parsed)
-        decoded = tostring(parsed).decode()
-        return decoded[len(SVG_PREFIX):-len(SVG_SUFFIX)]
+
+        return re.sub('({{.*}}|{%.*%})',
+                      lambda x: html.unescape(x.group()),
+                      tostring(parsed).decode()[len(SVG_PREFIX):-len(SVG_SUFFIX)])
 
     def replace(self, replace_id: str, content: str):
         return self.create(self.svg, self._replace_stack + [(replace_id, content)], self._last_kwargs)
