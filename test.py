@@ -42,21 +42,26 @@ class Tests(unittest.IsolatedAsyncioTestCase):
     async def test_replace(self):
         creator = ImageCreator()
 
-        svg = '<rect width="250" height="40" rx="10" ry="10" fill="red"/>\n' \
+        svg = '<defs>\n' \
+              '</defs>\n' \
+              '<image x="15" y="15" width="120" height="120" xlink:href="{{ avatar_url | web_image }}"/>\n' \
               '<text id="title" text-anchor="middle" fill="white">{{ name }}</text>'
 
         s = ImageStackResolveString(svg)
         s(**{
-            'name': 'Legginsdarry'
+            'name': 'Legginsdarry',
+            'avatar_url': 'http://test.com'
         })
 
         s = s.replace('title', '<text id="title" text-anchor="start" fill="white">Leggins</text>')
 
-        s = s.replace('title', '<image id="userEmoji" x="147" y="15" width="40" height="40" xlink:href="house"/>')
+        s = s.replace('title', '<image id="userEmoji" x="147" y="15" xlink:href="{{ avatar_url | web_image }}"/>')
 
         res = await creator.create_inner_svg(s)
-        self.assertEqual(res, '<rect width="250" height="40" rx="10" ry="10" fill="red"/>\n'
-                              '<image id="userEmoji" x="147" y="15" width="40" height="40" xlink:href="house"/>')
+        self.assertEqual(res, '<defs>\n'
+                              '</defs>\n'
+                              '<image x="15" y="15" width="120" height="120" xlink:href="http://test.com"/>\n'
+                              '<image id="userEmoji" x="147" y="15" xlink:href="http://test.com"/>')
 
 
 if __name__ == '__main__':
