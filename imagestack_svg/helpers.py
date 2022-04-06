@@ -49,6 +49,10 @@ class CacheDict(MutableMapping):
         self.uses = dict()
         self.max_size = max_size
 
+    def clear(self) -> None:
+        self.d.clear()
+        self.uses.clear()
+
     def __getitem__(self, key):
         if self.max_size < 1:
             return self.d[key]
