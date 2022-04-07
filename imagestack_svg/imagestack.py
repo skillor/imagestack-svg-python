@@ -52,7 +52,7 @@ class ImageStack:
                            image_creator: ImageCreator,
                            image_format: QImage.Format = QImage.Format_RGBA64,
                            max_size: tuple = None):
-        return self._create_bytes(self._replace(self.svg), image_format, max_size)
+        return await self._create_bytes(self._replace(self.svg), image_format, max_size)
 
     async def _create_raw_svg(self, svg: str) -> str:
         return f'{SVG_PREFIX}{svg}{SVG_SUFFIX}'
