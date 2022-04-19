@@ -25,7 +25,8 @@ jobs:
       QT_QPA_PLATFORM: "offscreen"
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
