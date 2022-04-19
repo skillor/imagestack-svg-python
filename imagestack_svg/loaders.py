@@ -75,10 +75,9 @@ class EmojiLoader:
                 return url
 
     def get_image_bytes(self, emoji: str):
-        if is_emoji(emoji):
-            emoji_id = from_char(emoji)
-        else:
-            emoji_id = from_char(self.emoji_fallback)
+        if not is_emoji(emoji):
+            emoji = self.emoji_fallback
+        emoji_id = from_char(emoji)
 
         if emoji in self.cached_images:
             return self.cached_images[emoji]
