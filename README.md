@@ -10,7 +10,7 @@
 
     pip install imagestack-svg
 
-### Running in terminal environment
+### Running without display
 
     xvfb-run python3 {your application}
 
