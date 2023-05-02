@@ -10,7 +10,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(name='ImageStack SVG',
       packages=['imagestack_svg'],
-      version='0.2.6',
+      version='1.0.0',
       description='Create Images by Stacking them',
       author='skillor',
       author_email='skillor@gmx.net',
