@@ -1,6 +1,6 @@
 # ImageStack Python
 
-### A simple way to create images
+### A simple way to create images using svg and jinja2 templating
 
 [![Build Status](https://github.com/skillor/imagestack-svg-python/actions/workflows/test-python.yml/badge.svg)](https://github.com/skillor/imagestack-svg-python/actions/workflows/test-python.yml) [![PyPi version](https://badgen.net/pypi/v/ImageStack-SVG/)](https://pypi.org/project/ImageStack-SVG)
 
