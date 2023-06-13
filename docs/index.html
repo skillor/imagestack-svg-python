@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.css"></link>
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.js"></script>
-    <script type="text/javascript" src="liquid.browser.min.js"></script>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
     <style>
       html, body, main {
         width: 100%;
@@ -65,6 +66,23 @@
         </div>
       </section>
     </main>
+    <py-config>
+      packages = ["jinja2"]
+    </py-config>
+    <py-script>
+      import json
+      import jinja2.sandbox
+      from js import onChange
+      jinja2_env = jinja2.sandbox.ImmutableSandboxedEnvironment()
+      jinja2_env.filters['emoji'] = lambda x: 'https://emojiapi.dev/api/v1/{}.svg'.format(format(ord(x[0]), 'x'))
+      jinja2_env.filters['web_image'] = lambda x: x
+
+      def create_svg(svg, data):
+        t = jinja2_env.from_string(svg)
+        return t.render(**json.loads(data))
+
+      onChange()
+    </py-script>
     <script type="text/javascript">
       function create_inverse_circle() {
         var x = +document.getElementById('inverseCircleX').value;
@@ -77,11 +95,6 @@
         document.getElementById('inverseCircleResult').value = res;
       }
 
-      var engine = new liquidjs.Liquid();
-
-      engine.registerFilter('web_image', v => v);
-      engine.registerFilter('emoji', v => "https://emojiapi.dev/api/v1/" + (v.codePointAt(0).toString(16)) + '.svg');
-
       var jsonInput = CodeMirror.fromTextArea(document.getElementById('jsonInput'), {
         lineNumbers: true
       });
@@ -92,11 +105,14 @@
         lineNumbers: true
       });
 
-      function onChange(cm, change) {
+
+      function onChange(...args) {
+        if (!window['pyscript']) return;
         try {
-          outputSvg.innerHTML = engine.parseAndRenderSync(inputCode.getValue(), JSON.parse(jsonInput.getValue()));
-        } catch(error) {
-          console.log(error.message);
+          var create_svg = pyscript.interpreter.globals.get('create_svg');
+          outputSvg.innerHTML = create_svg(inputCode.getValue(), jsonInput.getValue());
+        } catch (err) {
+          console.log(err)
         }
       }
 
