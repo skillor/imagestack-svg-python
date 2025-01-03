@@ -42,7 +42,8 @@ jobs:
         python -m twine upload "dist/*" -u "__token__" -p ${{ secrets.PYPI_API_TOKEN }}
     - name: Commit version bumped setup.py
       run: |
-        git config --global user.name "Release Runner"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
         git add --force ./setup.py
         git commit -am "Bump release version"
         git tag -fa ${{ github.event.release.tag_name }} -m "Bump to version ${{ github.event.release.tag_name }}"
