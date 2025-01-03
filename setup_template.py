@@ -8,7 +8,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 with open("requirements.txt", "r", encoding="utf-8") as fh:
     requirements = [x for x in fh.read().splitlines() if x]
 
-setup(name='ImageStack SVG',
+setup(name='imagestack_svg',
       packages=['imagestack_svg'],
       version='{$IMAGESTACK_SVG_VERSION}',
       description='Create Images by Stacking them',
