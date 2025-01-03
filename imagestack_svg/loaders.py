@@ -1,5 +1,6 @@
 import base64
 import os
+import re
 import warnings
 from typing import List
 
@@ -27,7 +28,9 @@ class WebImageLoader:
 
 
 class EmojiLoader:
-    base_emoji_url = 'http://emojipedia.org/'
+    emoji_search_url = 'http://emojipedia.org/{}#designs'
+    emoji_search_regex = r'"source\/microsoft\/(.*?)(?<!\\)"'
+    emoji_match_url = 'https://em-content.zobj.net/source/microsoft/{}'
 
     def __init__(self,
                  emoji_path: str = None,
@@ -35,7 +38,6 @@ class EmojiLoader:
                  download_emojis: bool = False,
                  max_cache_images: int = 20,
                  save_downloaded_emojis: bool = False,
-                 download_emoji_provider: str = 'microsoft',
                  max_cache_links: int = 20,
                  ):
         self.save_downloaded_emojis = save_downloaded_emojis
@@ -46,7 +48,6 @@ class EmojiLoader:
         self.emoji_fallback = emoji_fallback
 
         self.download_emojis = download_emojis
-        self.download_emoji_provider = download_emoji_provider
 
         self.cached_links = CacheDict(max_size=max_cache_links)
         self.cached_images = CacheDict(max_size=max_cache_images)
@@ -67,15 +68,15 @@ class EmojiLoader:
     def get_emoji_image_url(self, emoji: str):
         if emoji in self.cached_links:
             return self.cached_links[emoji]
-        r = requests.get(self.base_emoji_url + emoji)
-        for x in r.text.split('data-src="')[1:]:
-            url = x.split('"')[0]
-            if '/{}/'.format(self.download_emoji_provider) in url:
-                self.cached_links[emoji] = url
-                return url
-
-    def get_image_bytes(self, emoji: str):
-        if not is_emoji(emoji):
+        r = requests.get(self.emoji_search_url.format(emoji))
+        match = re.search(self.emoji_search_regex, r.text)
+        if not match:
+            return None
+        source = match.group(1)
+        return self.emoji_match_url.format(source)
+    
+    def get_image_bytes(self, emoji: str, do_fallback=True):
+        if do_fallback and not is_emoji(emoji):
             emoji = self.emoji_fallback
         emoji_id = from_char(emoji)
 
@@ -93,7 +94,7 @@ class EmojiLoader:
         elif self.download_emojis:
             url = self.get_emoji_image_url(emoji)
             if url is None:
-                warnings.warn('Emoji "{}" was not found on "{}"!'.format(emoji, self.base_emoji_url))
+                warnings.warn('Emoji "{}" was not found on "{}"!'.format(emoji, self.emoji_search_url))
             else:
                 img_bytes = requests.get(url).content
                 if self.save_downloaded_emojis and file is not None:
@@ -101,9 +102,17 @@ class EmojiLoader:
                         f.write(img_bytes)
                 self.cached_images[emoji] = img_bytes
                 return img_bytes
+        if do_fallback:
+            return self.get_image_bytes(self.emoji_fallback, do_fallback= False)
+        return b''
 
     def get_base64(self, emoji: str):
-        return f"data:image/jpeg;base64,{base64.b64encode(self.get_image_bytes(emoji)).decode('utf-8')}"
+        image_bytes = self.get_image_bytes(emoji)
+
+        if len(image_bytes) == 0:
+            return 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
+
+        return f"data:image/jpeg;base64,{base64.b64encode(image_bytes).decode('utf-8')}"
 
 
 class FontLoader:

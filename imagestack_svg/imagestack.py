@@ -39,14 +39,19 @@ class ImageStack:
 
         svg_renderer.render(painter)
 
+        painter.end()
+
         ba = QByteArray()
         buffer = QBuffer(ba)
         buffer.open(QIODevice.ReadWrite)
 
         orig_svg.save(buffer, 'PNG', -1)
-        painter.end()
         buffer.seek(0)
-        return io.BytesIO(buffer.readAll())
+
+        bio = io.BytesIO(buffer.readAll())
+
+        buffer.close()
+        return bio
 
     async def create_bytes(self,
                            image_creator: ImageCreator,

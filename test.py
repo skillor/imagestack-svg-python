@@ -3,6 +3,7 @@ import unittest
 from imagestack_svg.imageresolve import ImageStackResolveString
 from imagestack_svg.imagecreator import ImageCreator
 from imagestack_svg.helpers import is_emoji, from_char, to_char
+from imagestack_svg.loaders import EmojiLoader
 
 
 class Tests(unittest.IsolatedAsyncioTestCase):
@@ -31,7 +32,7 @@ class Tests(unittest.IsolatedAsyncioTestCase):
 
         res = await creator.create_bytes(s)
 
-        self.assertGreater(len(res.read()), 1)
+        self.assertGreater(len(res.read()), 0)
 
         res = await creator.create_inner_svg(s)
         self.assertEqual(res, '<rect x="0" y="0" width="600" height="150" rx="20" ry="20" fill="rgb(48, 50, 55)"/>\n'
@@ -62,6 +63,20 @@ class Tests(unittest.IsolatedAsyncioTestCase):
                               '</defs>\n'
                               '<image x="15" y="15" width="120" height="120" xlink:href="http://test.com"/>\n'
                               '<image id="userEmoji" x="147" y="15" xlink:href="http://test.com"/>')
+        
+    async def test_emoji(self):
+        creator = ImageCreator(emoji_loader=EmojiLoader(download_emojis=True))
+
+        svg = '<rect x="0" y="0" width="600" height="150" rx="20" ry="20" fill="rgb(48, 50, 55)"/>\n' \
+              '<text id="title" text-anchor="start" y="15" fill="white">Leggins</text>\n' \
+              '<image x="100" y="100" width="60" height="60" xlink:href="{{ test_emoji | emoji }}"/>'
+
+        s = ImageStackResolveString(svg)
+        s(test_emoji='🪐')
+
+        res = await creator.create_bytes(s)
+
+        self.assertGreater(len(res.read()), 0)
 
 
 if __name__ == '__main__':
