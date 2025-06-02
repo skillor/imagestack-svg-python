@@ -1,5 +1,10 @@
-from PySide2.QtGui import QImage
-from PySide2.QtWidgets import QApplication
+try:
+    from PySide2.QtGui import QImage
+    from PySide2.QtWidgets import QApplication
+except ModuleNotFoundError:
+    from PySide6.QtGui import QImage
+    from PySide6.QtWidgets import QApplication
+
 import asyncio
 import threading
 import jinja2.sandbox

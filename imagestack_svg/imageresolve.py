@@ -1,4 +1,7 @@
-from PySide2.QtGui import QImage
+try:
+    from PySide2.QtGui import QImage
+except ModuleNotFoundError:
+    from PySide6.QtGui import QImage
 
 from .imagestack import ImageStack
 from .imagecreator import ImageCreator

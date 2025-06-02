@@ -6,8 +6,12 @@ from typing import List
 
 import http.client
 import requests
-from PySide2.QtGui import QFontDatabase
-from .helpers import from_char, is_emoji, to_char, CacheDict
+
+try:
+    from PySide2.QtGui import QFontDatabase
+except ModuleNotFoundError:
+    from PySide6.QtGui import QFontDatabase
+
 from .helpers import http_emoji_encode, from_char, is_emoji, to_char, CacheDict
 
 
@@ -87,7 +91,6 @@ class EmojiLoader:
             return None
         source = re.sub(r'\\$', '', match.group(1))
         
-        print('EMOJI:', self.emoji_match_url.format(source))
         return self.emoji_match_url.format(source)
     
     def get_image_bytes(self, emoji: str, do_fallback=True):

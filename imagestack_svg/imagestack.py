@@ -2,9 +2,15 @@ import io
 import re
 from typing import List, Tuple
 
-from PySide2.QtCore import QByteArray, QBuffer, QIODevice
-from PySide2.QtGui import QImage, QPainter, QColor
-from PySide2.QtSvg import QSvgRenderer
+try:
+    from PySide2.QtCore import QByteArray, QBuffer, QIODevice
+    from PySide2.QtGui import QImage, QPainter, QColor
+    from PySide2.QtSvg import QSvgRenderer
+except ModuleNotFoundError:
+    from PySide6.QtCore import QByteArray, QBuffer, QIODevice
+    from PySide6.QtGui import QImage, QPainter, QColor
+    from PySide6.QtSvg import QSvgRenderer
+
 from .imagecreator import ImageCreator, SVG_PREFIX, SVG_SUFFIX
 import html
 from defusedxml.lxml import fromstring, tostring
