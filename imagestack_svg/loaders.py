@@ -4,9 +4,11 @@ import re
 import warnings
 from typing import List
 
+import http.client
 import requests
 from PySide2.QtGui import QFontDatabase
 from .helpers import from_char, is_emoji, to_char, CacheDict
+from .helpers import http_emoji_encode, from_char, is_emoji, to_char, CacheDict
 
 
 class WebImageLoader:
@@ -28,8 +30,8 @@ class WebImageLoader:
 
 
 class EmojiLoader:
-    emoji_search_url = 'http://emojipedia.org/{}#designs'
-    emoji_search_regex = r'"source\/microsoft\/(.*?)(?<!\\)"'
+    emoji_search_url = 'http://emojipedia.org/{}'
+    emoji_search_regex = r'"source/microsoft/(.*?)"'
     emoji_match_url = 'https://em-content.zobj.net/source/microsoft/{}'
 
     def __init__(self,
@@ -68,11 +70,24 @@ class EmojiLoader:
     def get_emoji_image_url(self, emoji: str):
         if emoji in self.cached_links:
             return self.cached_links[emoji]
-        r = requests.get(self.emoji_search_url.format(emoji))
-        match = re.search(self.emoji_search_regex, r.text)
+        
+        conn = http.client.HTTPSConnection('emojipedia.org')
+        payload = ''
+        headers = {}
+        conn.request('GET', '/' + http_emoji_encode('🌸'), payload, headers)
+        res = conn.getresponse()
+        data = res.read().decode('utf-8')
+        conn.request('GET', data, payload, headers)
+        res = conn.getresponse()
+        data = res.read().decode('utf-8')
+        conn.close()
+        
+        match = re.search(self.emoji_search_regex, data)
         if not match:
             return None
-        source = match.group(1)
+        source = re.sub(r'\\$', '', match.group(1))
+        
+        print('EMOJI:', self.emoji_match_url.format(source))
         return self.emoji_match_url.format(source)
     
     def get_image_bytes(self, emoji: str, do_fallback=True):

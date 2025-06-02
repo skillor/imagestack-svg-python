@@ -2,6 +2,8 @@ import asyncio
 import re
 from collections.abc import MutableMapping
 
+def http_emoji_encode(c: str) -> str:
+    return ''.join(['%' + hex(s)[2:].upper() for s in c.encode('utf-8')])
 
 def from_char(c: str) -> str:
     return c.encode('utf-8').hex()
